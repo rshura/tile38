@@ -18,7 +18,9 @@ func clipPolygon(
 		for i := 0; i < len(ringPoints); i++ {
 			ringPoints[i] = ring.PointAt(i)
 		}
-		newPoints = append(newPoints, clipRing(ringPoints, rect))
+		if clippedRing := clipRing(ringPoints, rect); len(clippedRing) > 0 {
+			newPoints = append(newPoints, clippedRing)
+		}
 	}
 
 	var exterior []geometry.Point
