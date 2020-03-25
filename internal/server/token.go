@@ -160,12 +160,16 @@ func zMinMaxFromWheres(wheres []whereT) (minZ, maxZ float64) {
 
 type whereinT struct {
 	field  string
-	valMap map[float64]struct{}
+	valArr []float64
 }
 
 func (wherein whereinT) match(value float64) bool {
-	_, ok := wherein.valMap[value]
-	return ok
+	for _, val := range wherein.valArr {
+		if val == value {
+			return true
+		}
+	}
+	return false
 }
 
 type whereevalT struct {
@@ -343,9 +347,8 @@ func (s *Server) parseSearchScanBaseTokens(
 					err = errInvalidArgument(nvalsStr)
 					return
 				}
-				valMap := make(map[float64]struct{})
+				valArr := make([]float64, nvals)
 				var val float64
-				var empty struct{}
 				for i = 0; i < nvals; i++ {
 					if vs, valStr, ok = tokenval(vs); !ok || valStr == "" {
 						err = errInvalidNumberOfArguments
@@ -355,9 +358,9 @@ func (s *Server) parseSearchScanBaseTokens(
 						err = errInvalidArgument(valStr)
 						return
 					}
-					valMap[val] = empty
+					valArr = append(valArr, val)
 				}
-				t.whereins = append(t.whereins, whereinT{field, valMap})
+				t.whereins = append(t.whereins, whereinT{field, valArr})
 				continue
 			case "whereevalsha":
 				fallthrough
